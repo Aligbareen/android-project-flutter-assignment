@@ -28,17 +28,28 @@ class _RandomWordsState extends State<RandomWords> {
   final List<WordPair> _suggestions =  <WordPair>[];
   final _saved = Set<WordPair>();
   final TextStyle _biggerFont = const TextStyle(fontSize: 18);
+  final GlobalKey<ScaffoldState> _scaffoldKeyDel = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKeyLog = new GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
     return Scaffold (                     // Add from here...
       appBar: AppBar(
         title: Text('Startup Name Generator'),
         actions: [
-          IconButton(icon: Icon(Icons.list), onPressed: _pushSaved),
+          IconButton(icon: Icon(Icons.favorite), onPressed: _pushSaved),
+          IconButton(icon: Icon(Icons.login), onPressed: _pushLogin),
         ],
       ),
       body: _buildSuggestions(),
     );
+  }
+  _deletionNotImplemented(){
+    final snackBar = new SnackBar(
+      content: new Text("Deletion is not implemented yet"),
+      duration: new Duration(seconds: 2),
+      backgroundColor: Colors.blue,
+    );
+    _scaffoldKeyDel.currentState.showSnackBar(snackBar);
   }
   void _pushSaved() {
     Navigator.of(context).push(
@@ -52,6 +63,7 @@ class _RandomWordsState extends State<RandomWords> {
                   pair.asPascalCase,
                   style: _biggerFont,
                 ),
+                trailing: IconButton(icon: Icon(Icons.delete), onPressed: _deletionNotImplemented),
               );
             },
           );
@@ -61,6 +73,7 @@ class _RandomWordsState extends State<RandomWords> {
           ).toList();
 
           return Scaffold(
+            key: _scaffoldKeyDel,
             appBar: AppBar(
               title: Text('Saved Suggestions'),
             ),
@@ -69,6 +82,102 @@ class _RandomWordsState extends State<RandomWords> {
         }, // ...to here.
       ),
     );
+  }
+
+  void _pushLogin(){
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        // NEW lines from here...
+        builder: (BuildContext context) {
+          return Scaffold(
+            key: _scaffoldKeyLog,
+            appBar: AppBar(
+              title: Center(child: Text('Login')),
+            ),
+            body: _buildLoginScreen(),
+          );
+        }, // ...to here.
+      ),
+    );
+  }
+
+  Scaffold _buildLoginScreen(){
+    return Scaffold(
+        resizeToAvoidBottomPadding: false,
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              child: Container(
+                padding: EdgeInsets.fromLTRB(15.0, 50.0, 0.0, 0.0),
+                child: Text('Welcome to StartupNames Generator, please log in below',
+                    style: TextStyle(
+                        fontSize: 20.0, fontWeight: FontWeight.bold)),
+              ),
+            ),
+            Container(
+                padding: EdgeInsets.only(top: 35.0, left: 20.0, right: 20.0),
+                child: Column(
+                  children: <Widget>[
+                    TextField(
+                      decoration: InputDecoration(
+                          labelText: 'EMAIL',
+                          labelStyle: TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey),
+                          focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.green))),
+                    ),
+                    SizedBox(height: 20.0),
+                    TextField(
+                      decoration: InputDecoration(
+                          labelText: 'PASSWORD',
+                          labelStyle: TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey),
+                          focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.green))),
+                      obscureText: true,
+                    ),
+                    SizedBox(height: 40.0),
+                    Container(
+                      height: 40.0,
+                      child: Center(
+                        child: FlatButton(
+                          color: Colors.red,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+                          padding: EdgeInsets.symmetric(horizontal: 164),
+                          onPressed: _loginNotImplemented,
+                          child: Text(
+                            'Log in',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Montserrat'
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20.0),
+                  ],
+                )
+            ),
+            SizedBox(height: 15.0),
+          ],
+        )
+    );
+  }
+
+  void _loginNotImplemented(){
+    final snackBar = new SnackBar(
+      content: new Text("Login is not implemented yet"),
+      duration: new Duration(seconds: 2),
+      backgroundColor: Colors.blue,
+    );
+    _scaffoldKeyLog.currentState.showSnackBar(snackBar);
   }
 
   Widget _buildSuggestions() {
@@ -115,7 +224,7 @@ class _RandomWordsState extends State<RandomWords> {
         alreadySaved ? Icons.favorite : Icons.favorite_border,
         color: alreadySaved ? Colors.red : null,
       ),
-      onTap: () {      // NEW lines from here...
+      onTap: () {
         setState(() {
           if (alreadySaved) {
             _saved.remove(pair);
