@@ -1,7 +1,35 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:english_words/english_words.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(App());
+}
+
+class App extends StatelessWidget {
+  final Future<FirebaseApp> _initialization = Firebase.initializeApp();
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        future: _initialization,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Scaffold(
+                body: Center(
+                    child: Text(snapshot.error.toString(),
+                        textDirection: TextDirection.ltr)));
+          }
+          if (snapshot.connectionState == ConnectionState.done) {
+            return MyApp();
+          }
+          return Center(child: CircularProgressIndicator());
+        },
+    );
+  }
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -25,6 +53,8 @@ class RandomWords extends StatefulWidget {
 }
 
 class _RandomWordsState extends State<RandomWords> {
+  String _password, _username;
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final List<WordPair> _suggestions =  <WordPair>[];
   final _saved = Set<WordPair>();
   final TextStyle _biggerFont = const TextStyle(fontSize: 18);
@@ -138,8 +168,13 @@ class _RandomWordsState extends State<RandomWords> {
                               fontWeight: FontWeight.bold,
                               color: Colors.grey),
                           focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.green))),
+                              borderSide: BorderSide(color: Colors.green)
+                          )
+                      ),
                       obscureText: true,
+                      onChanged: (String str){
+                        _password = str;
+                      },
                     ),
                     SizedBox(height: 40.0),
                     Container(
@@ -171,7 +206,12 @@ class _RandomWordsState extends State<RandomWords> {
     );
   }
 
-  void _loginNotImplemented(){
+  Future<void> _loginNotImplemented() async {
+    try{
+      FirebaseAuth.instance.signInWithEmailAndPassword(email: _username, password: _password);
+    }catch(e){
+      print(e.message);
+    }
     final snackBar = new SnackBar(
       content: new Text("Login is not implemented yet"),
       duration: new Duration(seconds: 2),
