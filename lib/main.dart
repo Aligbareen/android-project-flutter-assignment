@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:english_words/english_words.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -74,13 +75,18 @@ class _RandomWordsState extends State<RandomWords> {
       body: _buildSuggestions(),
     );
   }
-  _deletionNotImplemented(){
+  _deletionNotImplemented(WordPair pair){
+    setState(() {
+      _saved.remove(pair);
+    });
+    /*
     final snackBar = new SnackBar(
       content: new Text("Deletion is not implemented yet"),
       duration: new Duration(seconds: 2),
       backgroundColor: Colors.blue,
     );
     _scaffoldKeyDel.currentState.showSnackBar(snackBar);
+     */
   }
   void _pushSaved() {
     Navigator.of(context).push(
@@ -94,7 +100,7 @@ class _RandomWordsState extends State<RandomWords> {
                   pair.asPascalCase,
                   style: _biggerFont,
                 ),
-                trailing: IconButton(icon: Icon(Icons.delete), onPressed: _deletionNotImplemented),
+                trailing: IconButton(icon: Icon(Icons.delete), onPressed: () => _deletionNotImplemented(pair)),
               );
             },
           );
@@ -115,8 +121,19 @@ class _RandomWordsState extends State<RandomWords> {
     );
   }
 
-  void _logOut(){
+  void _logOut() async {
+    List<Map<String,String>> myFavorites = _saved.map((e) => {"first" : e.first, "second" : e.second}).toList();
+    print("********************** new\n");
+    print("myFavorites type is : ${myFavorites.runtimeType}");
+    await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser.uid).set({"favorites" : myFavorites});
 
+    print(myFavorites.runtimeType.toString());
+    print(myFavorites.toString());
+    await FirebaseAuth.instance.signOut();
+    setState(() {
+      _saved.clear();
+      _loggedIn = false;
+    });
   }
   void _pushLogin(){
     Navigator.of(context).push(
@@ -138,79 +155,81 @@ class _RandomWordsState extends State<RandomWords> {
   Scaffold _buildLoginScreen(){
     return Scaffold(
         resizeToAvoidBottomPadding: false,
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              child: Container(
-                padding: EdgeInsets.fromLTRB(15.0, 50.0, 0.0, 0.0),
-                child: Text('Welcome to StartupNames Generator, please log in below',
-                    style: TextStyle(
-                        fontSize: 20.0, fontWeight: FontWeight.bold)),
-              ),
-            ),
-            Container(
-                padding: EdgeInsets.only(top: 35.0, left: 20.0, right: 20.0),
-                child: Column(
-                  children: <Widget>[
-                    TextField(
-                      decoration: InputDecoration(
-                          labelText: 'EMAIL',
-                          labelStyle: TextStyle(
-                              fontFamily: 'Montserrat',
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey),
-                          focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.green)
-                          )
-                      ),
-                      onChanged: (String str){
-                        _username = str;
-                      },
-                    ),
-                    SizedBox(height: 20.0),
-                    TextField(
-                      decoration: InputDecoration(
-                          labelText: 'PASSWORD',
-                          labelStyle: TextStyle(
-                              fontFamily: 'Montserrat',
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey),
-                          focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.green)
-                          )
-                      ),
-                      obscureText: true,
-                      onChanged: (String str){
-                        _password = str;
-                      },
-                    ),
-                    SizedBox(height: 40.0),
-                    Container(
-                      height: 40.0,
-                      child: Center(
-                        child: FlatButton(
-                          color: Colors.red,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-                          padding: EdgeInsets.symmetric(horizontal: 164),
-                          onPressed: _loginNotImplemented,
-                          child: Text(
-                            'Log in',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Montserrat'
+        body: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  child: Container(
+                    padding: EdgeInsets.fromLTRB(15.0, 50.0, 0.0, 0.0),
+                    child: Text('Welcome to StartupNames Generator, please log in below',
+                        style: TextStyle(
+                            fontSize: 20.0, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+                Container(
+                    padding: EdgeInsets.only(top: 35.0, left: 20.0, right: 20.0),
+                    child: Column(
+                      children: <Widget>[
+                        TextField(
+                          decoration: InputDecoration(
+                              labelText: 'EMAIL',
+                              labelStyle: TextStyle(
+                                  fontFamily: 'Montserrat',
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey),
+                              focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.green)
+                              )
+                          ),
+                          onChanged: (String str){
+                            _username = str;
+                          },
+                        ),
+                        SizedBox(height: 20.0),
+                        TextField(
+                          decoration: InputDecoration(
+                              labelText: 'PASSWORD',
+                              labelStyle: TextStyle(
+                                  fontFamily: 'Montserrat',
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey),
+                              focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.green)
+                              )
+                          ),
+                          obscureText: true,
+                          onChanged: (String str){
+                            _password = str;
+                          },
+                        ),
+                        SizedBox(height: 40.0),
+                        Container(
+                          height: 40.0,
+                          child: Center(
+                            child: FlatButton(
+                              color: Colors.red,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+                              padding: EdgeInsets.symmetric(horizontal: 164),
+                              onPressed: _loginNotImplemented,
+                              child: Text(
+                                'Log in',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'Montserrat'
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                    SizedBox(height: 20.0),
-                  ],
-                )
-            ),
-            SizedBox(height: 15.0),
-          ],
+                        SizedBox(height: 20.0),
+                      ],
+                    )
+                ),
+                SizedBox(height: 15.0),
+              ],
+            )
         )
     );
   }
@@ -218,9 +237,9 @@ class _RandomWordsState extends State<RandomWords> {
   Future<void> _loginNotImplemented() async {
     try{
       print("we are here !!!!!!!!!");
-      print("user name: ${_username} password: ${_password}");
-      UserCredential user = await FirebaseAuth.instance.signInWithEmailAndPassword(email: _username, password: _password);
-      print("the user we recived from server is : ${user.toString()}");
+      print("user name: $_username password: $_password");
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(email: _username, password: _password);
+      print("the user we received from server is : ${userCredential.user.uid}");
       print("*****************************");
       loggedIn();
     }catch(e){
@@ -234,9 +253,17 @@ class _RandomWordsState extends State<RandomWords> {
       _scaffoldKeyLog.currentState.showSnackBar(snackBar);
     }
   }
-  void loggedIn(){
+  void loggedIn() async {
+    DocumentSnapshot snapshot =  await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser.uid).get();
+    print("snapshot recieved $snapshot");
+    List<dynamic> myFavorites = snapshot.get("favorites");
+    print("myFavorites type is : ${myFavorites}");
+    print(myFavorites.runtimeType.toString());
+    print(myFavorites.toString());
+    Iterable My_saved_sugestions = myFavorites.map((e) => WordPair(e.values.toList()[0],e.values.toList()[1])).toSet();
     Navigator.pop(context);
     setState(() {
+      _saved.addAll(My_saved_sugestions);
       _loggedIn = true;
     });
   }
