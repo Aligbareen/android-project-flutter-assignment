@@ -53,6 +53,7 @@ class RandomWords extends StatefulWidget {
 }
 
 class _RandomWordsState extends State<RandomWords> {
+  bool _loggedIn = false;
   String _password, _username;
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final List<WordPair> _suggestions =  <WordPair>[];
@@ -67,7 +68,7 @@ class _RandomWordsState extends State<RandomWords> {
         title: Text('Startup Name Generator'),
         actions: [
           IconButton(icon: Icon(Icons.favorite), onPressed: _pushSaved),
-          IconButton(icon: Icon(Icons.login), onPressed: _pushLogin),
+          IconButton(icon: Icon(_loggedIn? Icons.exit_to_app : Icons.login), onPressed: _loggedIn? _logOut : _pushLogin),
         ],
       ),
       body: _buildSuggestions(),
@@ -114,6 +115,9 @@ class _RandomWordsState extends State<RandomWords> {
     );
   }
 
+  void _logOut(){
+
+  }
   void _pushLogin(){
     Navigator.of(context).push(
       MaterialPageRoute<void>(
@@ -157,7 +161,12 @@ class _RandomWordsState extends State<RandomWords> {
                               fontWeight: FontWeight.bold,
                               color: Colors.grey),
                           focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.green))),
+                              borderSide: BorderSide(color: Colors.green)
+                          )
+                      ),
+                      onChanged: (String str){
+                        _username = str;
+                      },
                     ),
                     SizedBox(height: 20.0),
                     TextField(
@@ -208,16 +217,28 @@ class _RandomWordsState extends State<RandomWords> {
 
   Future<void> _loginNotImplemented() async {
     try{
-      FirebaseAuth.instance.signInWithEmailAndPassword(email: _username, password: _password);
+      print("we are here !!!!!!!!!");
+      print("user name: ${_username} password: ${_password}");
+      UserCredential user = await FirebaseAuth.instance.signInWithEmailAndPassword(email: _username, password: _password);
+      print("the user we recived from server is : ${user.toString()}");
+      print("*****************************");
+      loggedIn();
     }catch(e){
+      print("your credentials are incorrect");
       print(e.message);
+      final snackBar = new SnackBar(
+        content: new Text("There was an error logging into the app"),
+        duration: new Duration(seconds: 2),
+        backgroundColor: Colors.blue,
+      );
+      _scaffoldKeyLog.currentState.showSnackBar(snackBar);
     }
-    final snackBar = new SnackBar(
-      content: new Text("Login is not implemented yet"),
-      duration: new Duration(seconds: 2),
-      backgroundColor: Colors.blue,
-    );
-    _scaffoldKeyLog.currentState.showSnackBar(snackBar);
+  }
+  void loggedIn(){
+    Navigator.pop(context);
+    setState(() {
+      _loggedIn = true;
+    });
   }
 
   Widget _buildSuggestions() {
