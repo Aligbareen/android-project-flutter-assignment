@@ -19,7 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKeyLog,
-      resizeToAvoidBottomPadding: false,
+      //resizeToAvoidBottomPadding: false,
       appBar: AppBar(
         title: Center(child: Text('Login')),
       ),
@@ -126,12 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
         duration: new Duration(seconds: 2),
         backgroundColor: Colors.blue,
       );
-      _scaffoldKeyLog.currentState.showSnackBar(SnackBar(
-        content: new Text("There was an error logging into the app"),
-        duration: new Duration(seconds: 1),
-        backgroundColor: Colors.red,
-      ));
-      Scaffold.of(context).showSnackBar(snackBar);
+      _scaffoldKeyLog.currentState.showSnackBar(snackBar);
     }
   }
 

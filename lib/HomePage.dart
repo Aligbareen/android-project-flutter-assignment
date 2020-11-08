@@ -25,7 +25,6 @@ class RandomWords extends StatefulWidget {
 
 class _RandomWordsState extends State<RandomWords> {
   bool _loggedIn = false;
-  FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final List<WordPair> _suggestions =  <WordPair>[];
   final _saved = Set<WordPair>();
   final TextStyle _biggerFont = const TextStyle(fontSize: 18);
@@ -60,7 +59,10 @@ class _RandomWordsState extends State<RandomWords> {
                   pair.asPascalCase,
                   style: _biggerFont,
                 ),
-                trailing: IconButton(icon: Icon(Icons.delete), onPressed: () => _deletionNotImplemented(pair)),
+                trailing: IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () => _deletionNotImplemented(pair)
+                ),
               );
             },
           );
