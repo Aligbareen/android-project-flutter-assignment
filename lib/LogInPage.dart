@@ -4,20 +4,21 @@ import 'package:english_words/english_words.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
-  bool loggedIn = false;
   final saved;
-  LoginScreen(this.loggedIn, this.saved);
+  LoginScreen(this.saved);
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
   String _password, _username;
+  bool processing = false;
+  bool loggedIn = false;
   final GlobalKey<ScaffoldState> _scaffoldKeyLog = new GlobalKey<ScaffoldState>();
   _LoginScreenState();
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(child: Scaffold(
+    return WillPopScope(child:Scaffold(
       key: _scaffoldKeyLog,
       //resizeToAvoidBottomPadding: false,
       appBar: AppBar(
@@ -26,8 +27,13 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Builder(
           builder: (BuildContext context)
           {
-            return SingleChildScrollView(
-                child: Column(
+            return
+              (processing)?
+              Center(child: Column(children: [CircularProgressIndicator(backgroundColor: Colors.lightGreenAccent)], crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.center))
+                  :
+              SingleChildScrollView(
+                child:
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Container(
@@ -108,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     ),
         onWillPop: (){
-            Navigator.pop(context,widget.loggedIn);
+            Navigator.pop(context,loggedIn);
             return Future.value(false);
         });
   }
@@ -116,15 +122,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _loginNotImplemented(context) async {
     try{
-      print("we are here !!!!!!!!!");
-      print("user name: $_username password: $_password");
-      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(email: _username, password: _password);
-      print("the user we received from server is : ${userCredential.user.uid}");
-      print("*****************************");
-      WhenloggedIn();
+      setState(() {
+        processing = true;
+      });
+      await FirebaseAuth.instance.signInWithEmailAndPassword(email: _username, password: _password);
+      whenLoggedIn();
     }catch(e){
-      print("your credentials are incorrect");
-      print(e.message);
+      setState(() {
+        processing = false;
+      });
       final snackBar = new SnackBar(
         content: new Text("There was an error logging into the app"),
         duration: new Duration(seconds: 2),
@@ -135,17 +141,18 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
 
-  void WhenloggedIn() async {
+  void whenLoggedIn() async {
     DocumentSnapshot snapshot =  await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser.uid).get();
-    print("snapshot recieved $snapshot");
     List<dynamic> myFavorites = snapshot.get("favorites");
-    print("myFavorites type is : ${myFavorites}");
     print(myFavorites.runtimeType.toString());
     print(myFavorites.toString());
-    Iterable My_saved_sugestions = myFavorites.map((e) => WordPair(e.values.toList()[0],e.values.toList()[1])).toSet();
-    widget.saved.addAll(My_saved_sugestions);
-    widget.loggedIn = true;
-    Navigator.pop(context, widget.loggedIn);
+    Iterable mySavedSuggestions = myFavorites.map((e) => WordPair(e.values.toList()[0],e.values.toList()[1])).toSet();
+    widget.saved.addAll(mySavedSuggestions);
+    loggedIn = true;
+    setState(() {
+      processing = false;
+    });
+    Navigator.pop(context, loggedIn);
   }
 
 }

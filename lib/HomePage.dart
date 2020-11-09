@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:english_words/english_words.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hello_me/LogInPage.dart';
+import 'package:hello_me/SavedPage.dart';
 
 
 class MyApp extends StatelessWidget {
@@ -24,11 +25,11 @@ class RandomWords extends StatefulWidget {
 }
 
 class _RandomWordsState extends State<RandomWords> {
+  final TextStyle _biggerFont = const TextStyle(fontSize: 18);
   bool _loggedIn = false;
+  bool processing = false;
   final List<WordPair> _suggestions =  <WordPair>[];
   var _saved = Set<WordPair>();
-  final TextStyle _biggerFont = const TextStyle(fontSize: 18);
-  final GlobalKey<ScaffoldState> _scaffoldKeyDel = new GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
     return Scaffold (                     // Add from here...
@@ -39,54 +40,32 @@ class _RandomWordsState extends State<RandomWords> {
           IconButton(icon: Icon(_loggedIn? Icons.exit_to_app : Icons.login), onPressed: _loggedIn? _logOut : _pushLogin),
         ],
       ),
-      body: _buildSuggestions(),
+      body:
+      (processing)?
+      Center(child: Column(children: [CircularProgressIndicator(backgroundColor: Colors.lightGreenAccent)], crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.center))
+          :_buildSuggestions(),
     );
   }
-  _deletionNotImplemented(WordPair pair){
-    setState(() {
-      _saved.remove(pair);
-    });
-  }
-  void _pushSaved() async {
-    _saved = await Navigator.of(context).push(
-      MaterialPageRoute(
-        // NEW lines from here...
-        builder: (BuildContext context) {
-          final tiles = _saved.map(
-                (WordPair pair) {
-              return ListTile(
-                title: Text(
-                  pair.asPascalCase,
-                  style: _biggerFont,
-                ),
-                trailing: IconButton(
-                    icon: Icon(Icons.delete),
-                    onPressed: () => _deletionNotImplemented(pair)
-                ),
-              );
-            },
-          );
-          final divided = ListTile.divideTiles(
-            context: context,
-            tiles: tiles,
-          ).toList();
 
-          return Scaffold(
-            key: _scaffoldKeyDel,
-            appBar: AppBar(
-              title: Text('Saved Suggestions'),
-            ),
-            body: ListView(children: divided),
-          );
-        }, // ...to here.
-      ),
-    );
+  void _pushSaved() async {
+    await Navigator.of(context).push(
+        MaterialPageRoute(
+          // NEW lines from here...
+            builder: (BuildContext context)
+            {
+              return SavedPage(_saved);
+            }
+        ));
+    setState(() {
+
+    });
   }
 
   void _logOut() async {
+    setState(() {
+      processing = true;
+    });
     List<Map<String,String>> myFavorites = _saved.map((e) => {"first" : e.first, "second" : e.second}).toList();
-    print("********************** new\n");
-    print("myFavorites type is : ${myFavorites.runtimeType}");
     await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser.uid).set({"favorites" : myFavorites});
 
     print(myFavorites.runtimeType.toString());
@@ -95,13 +74,14 @@ class _RandomWordsState extends State<RandomWords> {
     setState(() {
       _saved.clear();
       _loggedIn = false;
+      processing = false;
     });
   }
   void _pushLogin()  async {
     _loggedIn = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
-          return LoginScreen(_loggedIn, _saved);
+          return LoginScreen(_saved);
         },
       ),
     );
@@ -109,12 +89,6 @@ class _RandomWordsState extends State<RandomWords> {
     }
     );
   }
-
-
-
-
-
-
 
 
   Widget _buildSuggestions() {
