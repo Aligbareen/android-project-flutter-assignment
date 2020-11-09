@@ -26,7 +26,7 @@ class RandomWords extends StatefulWidget {
 class _RandomWordsState extends State<RandomWords> {
   bool _loggedIn = false;
   final List<WordPair> _suggestions =  <WordPair>[];
-  final _saved = Set<WordPair>();
+  var _saved = Set<WordPair>();
   final TextStyle _biggerFont = const TextStyle(fontSize: 18);
   final GlobalKey<ScaffoldState> _scaffoldKeyDel = new GlobalKey<ScaffoldState>();
   @override
@@ -47,9 +47,9 @@ class _RandomWordsState extends State<RandomWords> {
       _saved.remove(pair);
     });
   }
-  void _pushSaved() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
+  void _pushSaved() async {
+    _saved = await Navigator.of(context).push(
+      MaterialPageRoute(
         // NEW lines from here...
         builder: (BuildContext context) {
           final tiles = _saved.map(
@@ -97,14 +97,16 @@ class _RandomWordsState extends State<RandomWords> {
       _loggedIn = false;
     });
   }
-  void _pushLogin(){
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        // NEW lines from here...
+  void _pushLogin()  async {
+    _loggedIn = await Navigator.of(context).push(
+      MaterialPageRoute(
         builder: (BuildContext context) {
           return LoginScreen(_loggedIn, _saved);
-        }, // ...to here.
+        },
       ),
+    );
+    setState(() {
+    }
     );
   }
 

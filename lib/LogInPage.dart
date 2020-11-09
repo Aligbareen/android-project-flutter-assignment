@@ -17,7 +17,7 @@ class _LoginScreenState extends State<LoginScreen> {
   _LoginScreenState();
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(child: Scaffold(
       key: _scaffoldKeyLog,
       //resizeToAvoidBottomPadding: false,
       appBar: AppBar(
@@ -106,7 +106,11 @@ class _LoginScreenState extends State<LoginScreen> {
             );
           }
       ),
-    );
+    ),
+        onWillPop: (){
+            Navigator.pop(context,widget.loggedIn);
+            return Future.value(false);
+        });
   }
 
 
@@ -117,7 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
       UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(email: _username, password: _password);
       print("the user we received from server is : ${userCredential.user.uid}");
       print("*****************************");
-      loggedIn();
+      WhenloggedIn();
     }catch(e){
       print("your credentials are incorrect");
       print(e.message);
@@ -131,7 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
 
-  void loggedIn() async {
+  void WhenloggedIn() async {
     DocumentSnapshot snapshot =  await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser.uid).get();
     print("snapshot recieved $snapshot");
     List<dynamic> myFavorites = snapshot.get("favorites");
@@ -139,11 +143,9 @@ class _LoginScreenState extends State<LoginScreen> {
     print(myFavorites.runtimeType.toString());
     print(myFavorites.toString());
     Iterable My_saved_sugestions = myFavorites.map((e) => WordPair(e.values.toList()[0],e.values.toList()[1])).toSet();
-    Navigator.pop(context);
-    setState(() {
-      widget.saved.addAll(My_saved_sugestions);
-      widget.loggedIn = true;
-    });
+    widget.saved.addAll(My_saved_sugestions);
+    widget.loggedIn = true;
+    Navigator.pop(context, widget.loggedIn);
   }
 
 }
