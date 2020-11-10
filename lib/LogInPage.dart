@@ -142,10 +142,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
 
   void whenLoggedIn() async {
-    DocumentSnapshot snapshot =  await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser.uid).get();
+    DocumentSnapshot snapshot;
+    try{
+      snapshot =  await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser.uid).get();
+      snapshot.get("favorites");
+    }catch(e){
+      await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser.uid).set({"favorites" : []});
+      snapshot = await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser.uid).get();
+    }
     List<dynamic> myFavorites = snapshot.get("favorites");
-    print(myFavorites.runtimeType.toString());
-    print(myFavorites.toString());
     Iterable mySavedSuggestions = myFavorites.map((e) => WordPair(e.values.toList()[0],e.values.toList()[1])).toSet();
     widget.saved.addAll(mySavedSuggestions);
     loggedIn = true;
@@ -153,6 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
       processing = false;
     });
     Navigator.pop(context, loggedIn);
+
   }
 
 }

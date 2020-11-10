@@ -67,9 +67,6 @@ class _RandomWordsState extends State<RandomWords> {
     });
     List<Map<String,String>> myFavorites = _saved.map((e) => {"first" : e.first, "second" : e.second}).toList();
     await FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser.uid).set({"favorites" : myFavorites});
-
-    print(myFavorites.runtimeType.toString());
-    print(myFavorites.toString());
     await FirebaseAuth.instance.signOut();
     setState(() {
       _saved.clear();
