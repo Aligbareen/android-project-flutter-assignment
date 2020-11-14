@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hello_me/LogInPage.dart';
 import 'package:hello_me/SavedPage.dart';
 import 'package:snapping_sheet/snapping_sheet.dart';
-
+import 'dart:ui' as ui;
 
 class MyApp extends StatelessWidget {
   @override
@@ -26,7 +26,9 @@ class RandomWords extends StatefulWidget {
 }
 
 class _RandomWordsState extends State<RandomWords> {
+  var _controller = SnappingSheetController();
   final TextStyle _biggerFont = const TextStyle(fontSize: 18);
+  double _blur = 0.0;
   bool _loggedIn = false;
   bool processing = false;
   final List<WordPair> _suggestions =  <WordPair>[];
@@ -47,8 +49,23 @@ class _RandomWordsState extends State<RandomWords> {
           :
       (_loggedIn)?
       SnappingSheet(
+        snappingSheetController: _controller,
         //initSnapPosition: ,
-        child: _buildSuggestions(),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            _buildSuggestions(),
+            BackdropFilter(
+              filter: ui.ImageFilter.blur(
+                sigmaX: _blur,
+                sigmaY: _blur,
+              ),
+              child: Container(
+                color: Colors.transparent,
+              ),
+            )
+          ],
+        ),
         //sheetAbove: SnappingSheetContent(child: _buildSuggestions()),
         sheetBelow: SnappingSheetContent(child: Container(
             color: Colors.white, child: Text("welcome)"),),draggable: true),
@@ -66,6 +83,27 @@ class _RandomWordsState extends State<RandomWords> {
             padding: EdgeInsets.fromLTRB(10, 0, 10, 0 ),
           ),
         ),
+        onMove: (moveAmount){
+          if(moveAmount > 5 && _blur == 0.0) {
+            setState(() {
+              _blur = 8.0;
+            });
+          }
+          else if(moveAmount <= 5 && _blur != 0.0){
+            setState(() {
+              _blur = 0.0;
+            });
+          }
+        },
+        onSnapBegin: (){
+        },
+        onSnapEnd: (){
+        },
+        snapPositions: const [
+          SnapPosition(positionFactor: 0, snappingCurve: Curves.elasticOut, snappingDuration: Duration(milliseconds: 750)),
+          SnapPosition(positionFactor: 0.2),
+        ],
+        initSnapPosition: SnapPosition(positionFactor: 0),
       )
           :
       _buildSuggestions(),
