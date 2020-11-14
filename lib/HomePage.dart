@@ -4,6 +4,7 @@ import 'package:english_words/english_words.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hello_me/LogInPage.dart';
 import 'package:hello_me/SavedPage.dart';
+import 'package:snapping_sheet/snapping_sheet.dart';
 
 
 class MyApp extends StatelessWidget {
@@ -43,7 +44,31 @@ class _RandomWordsState extends State<RandomWords> {
       body:
       (processing)?
       Center(child: Column(children: [CircularProgressIndicator(backgroundColor: Colors.lightGreenAccent)], crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.center))
-          :_buildSuggestions(),
+          :
+      (_loggedIn)?
+      SnappingSheet(
+        //initSnapPosition: ,
+        child: _buildSuggestions(),
+        //sheetAbove: SnappingSheetContent(child: _buildSuggestions()),
+        sheetBelow: SnappingSheetContent(child: Container(
+            color: Colors.white, child: Text("welcome)"),),draggable: true),
+        grabbing: Container(
+          color: Colors.grey,
+          child: Padding(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children:[
+                    Text("Welcome back, " + FirebaseAuth.instance.currentUser.email, style: TextStyle(fontSize: 18.0),textAlign: TextAlign.left,),
+                    Align(child:Icon(Icons.keyboard_arrow_up_rounded,size: 30.0,), alignment: Alignment.centerRight,)
+                  ]
+
+              ),
+            padding: EdgeInsets.fromLTRB(10, 0, 10, 0 ),
+          ),
+        ),
+      )
+          :
+      _buildSuggestions(),
     );
   }
 
