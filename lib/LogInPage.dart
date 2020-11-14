@@ -89,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   color: Colors.red,
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(20.0)),
-                                  padding: EdgeInsets.symmetric(horizontal: 164),
+                                  padding: EdgeInsets.symmetric(horizontal: (MediaQuery.of(context).size.width)/3),
                                   onPressed: ()=>_loginNotImplemented(context),
                                   child: Text(
                                     'Log in',

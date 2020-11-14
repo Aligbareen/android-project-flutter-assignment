@@ -77,7 +77,10 @@ class _RandomWordsState extends State<RandomWords> with SingleTickerProviderStat
       SnappingSheet(
         snappingSheetController: _controller,
         //initSnapPosition: ,
-        child: Stack(
+        child: (_blur == 0.0)?
+        _buildSuggestions()
+            :
+        Stack(
           fit: StackFit.expand,
           children: [
             _buildSuggestions(),
@@ -94,19 +97,49 @@ class _RandomWordsState extends State<RandomWords> with SingleTickerProviderStat
         ),
         //sheetAbove: SnappingSheetContent(child: _buildSuggestions()),
         sheetBelow: SnappingSheetContent(
-            child: Container(
-              color: Colors.white,
-              child: Text("welcome)"),),
+              child: Container(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                color: Colors.white,
+                child: ListTile(
+                    //tileColor: Colors.green,
+                    //tileColor: Colors.black,
+                    leading: Container(
+                      //color: Colors.green,
+                      child: CircleAvatar(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.green,
+
+                        radius: 35,
+                      ),
+                    ),
+                    title: Text(FirebaseAuth.instance.currentUser.email,style: TextStyle(color: Colors.black,fontSize: 20),),
+                    subtitle: Container(
+                      //color: Colors.black,
+                      height: 40,//MediaQuery.of(context).size.height/20,
+                      alignment: Alignment.topLeft,
+                      padding: EdgeInsets.fromLTRB(0,15,0,0),
+                      //margin: EdgeInsets.fromLTRB(0, 0, 0, MediaQuery.of(context).size.height/9),
+                      child: RaisedButton(
+                        onPressed: (){},
+                        color: Colors.teal,
+                        child: Text("Change avatar", style: TextStyle(color: Colors.white),),
+
+                      ),
+                    )
+                ),
+            ),
             draggable: true
         ),
         grabbing: InkWell(
           child: Container(
             color: Colors.grey,
+            padding: EdgeInsets.fromLTRB(10, 0, 10, 0 ),
+            margin: EdgeInsets.fromLTRB(0,20, 0, 0 ),
             child: Padding(
               child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children:[
-                    Text("Welcome back, " + FirebaseAuth.instance.currentUser.email, style: TextStyle(fontSize: 18.0),textAlign: TextAlign.left,),
+                    Text("Welcome back, " + FirebaseAuth.instance.currentUser.email, style: TextStyle(fontSize: 16.0),textAlign: TextAlign.left,),
                     Align(
                       child: RotationTransition(
                         child: Icon(Icons.keyboard_arrow_up_rounded,size: 30.0,),
@@ -132,7 +165,7 @@ class _RandomWordsState extends State<RandomWords> with SingleTickerProviderStat
         onMove: (moveAmount){
           if(moveAmount > 10 && _blur == 0.0) {
             setState(() {
-              _blur = 8.0;
+              _blur = 5.0;
               _arrowIconAnimationController.forward();
             });
           }
@@ -147,9 +180,9 @@ class _RandomWordsState extends State<RandomWords> with SingleTickerProviderStat
         },
         onSnapEnd: (){
         },
-        snapPositions: const [
+        snapPositions:  [
           SnapPosition(positionFactor: 0, snappingCurve: Curves.elasticOut, snappingDuration: Duration(milliseconds: 750)),
-          SnapPosition(positionFactor: 0.2),
+          SnapPosition(positionFactor: 180/MediaQuery.of(context).size.height),
         ],
         initSnapPosition: SnapPosition(positionFactor: 0),
       )
