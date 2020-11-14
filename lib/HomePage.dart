@@ -25,7 +25,7 @@ class RandomWords extends StatefulWidget {
   _RandomWordsState createState() => _RandomWordsState();
 }
 
-class _RandomWordsState extends State<RandomWords> {
+class _RandomWordsState extends State<RandomWords> with SingleTickerProviderStateMixin{
   var _controller = SnappingSheetController();
   final TextStyle _biggerFont = const TextStyle(fontSize: 18);
   double _blur = 0.0;
@@ -33,6 +33,22 @@ class _RandomWordsState extends State<RandomWords> {
   bool processing = false;
   final List<WordPair> _suggestions =  <WordPair>[];
   var _saved = Set<WordPair>();
+  AnimationController _arrowIconAnimationController;
+  Animation<double> _arrowIconAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _arrowIconAnimationController = AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+    _arrowIconAnimation = Tween(begin: 0.0, end: 0.5).animate(
+        CurvedAnimation(
+            curve: Curves.elasticOut,
+            reverseCurve: Curves.elasticIn,
+            parent: _arrowIconAnimationController
+        )
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold (                     // Add from here...
@@ -40,12 +56,22 @@ class _RandomWordsState extends State<RandomWords> {
         title: Text('Startup Name Generator'),
         actions: [
           IconButton(icon: Icon(Icons.favorite), onPressed: _pushSaved),
-          IconButton(icon: Icon(_loggedIn? Icons.exit_to_app : Icons.login), onPressed: _loggedIn? _logOut : _pushLogin),
+          IconButton(
+              icon: Icon(_loggedIn? Icons.exit_to_app : Icons.login),
+              onPressed: _loggedIn? _logOut : _pushLogin
+          ),
         ],
       ),
       body:
       (processing)?
-      Center(child: Column(children: [CircularProgressIndicator(backgroundColor: Colors.lightGreenAccent)], crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.center))
+      Center(
+          child: Column(
+              children: [
+                CircularProgressIndicator(backgroundColor: Colors.lightGreenAccent)
+              ],
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center)
+      )
           :
       (_loggedIn)?
       SnappingSheet(
@@ -67,31 +93,53 @@ class _RandomWordsState extends State<RandomWords> {
           ],
         ),
         //sheetAbove: SnappingSheetContent(child: _buildSuggestions()),
-        sheetBelow: SnappingSheetContent(child: Container(
-            color: Colors.white, child: Text("welcome)"),),draggable: true),
-        grabbing: Container(
-          color: Colors.grey,
-          child: Padding(
+        sheetBelow: SnappingSheetContent(
+            child: Container(
+              color: Colors.white,
+              child: Text("welcome)"),),
+            draggable: true
+        ),
+        grabbing: InkWell(
+          child: Container(
+            color: Colors.grey,
+            child: Padding(
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children:[
                     Text("Welcome back, " + FirebaseAuth.instance.currentUser.email, style: TextStyle(fontSize: 18.0),textAlign: TextAlign.left,),
-                    Align(child:Icon(Icons.keyboard_arrow_up_rounded,size: 30.0,), alignment: Alignment.centerRight,)
+                    Align(
+                      child: RotationTransition(
+                        child: Icon(Icons.keyboard_arrow_up_rounded,size: 30.0,),
+                        turns: _arrowIconAnimation,
+                      ),
+                      alignment: Alignment.centerRight,
+                    )
                   ]
 
               ),
-            padding: EdgeInsets.fromLTRB(10, 0, 10, 0 ),
+              padding: EdgeInsets.fromLTRB(10, 0, 10, 0 ),
+            ),
           ),
+          onTap: (){
+            if(_controller.currentSnapPosition == _controller.snapPositions.first){
+              _controller.snapToPosition(_controller.snapPositions.last);
+            }
+            else{
+              _controller.snapToPosition(_controller.snapPositions.first);
+            }
+          },
         ),
         onMove: (moveAmount){
-          if(moveAmount > 5 && _blur == 0.0) {
+          if(moveAmount > 10 && _blur == 0.0) {
             setState(() {
               _blur = 8.0;
+              _arrowIconAnimationController.forward();
             });
           }
-          else if(moveAmount <= 5 && _blur != 0.0){
+          else if(moveAmount <= 10 && _blur != 0.0){
             setState(() {
               _blur = 0.0;
+              _arrowIconAnimationController.reverse();
             });
           }
         },
