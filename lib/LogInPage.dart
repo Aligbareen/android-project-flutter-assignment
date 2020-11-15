@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:english_words/english_words.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 class LoginScreen extends StatefulWidget {
   final saved;
   LoginScreen(this.saved);
@@ -16,6 +15,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool loggedIn = false;
   final GlobalKey<ScaffoldState> _scaffoldKeyLog = new GlobalKey<ScaffoldState>();
   _LoginScreenState();
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(child:Scaffold(
@@ -29,7 +29,15 @@ class _LoginScreenState extends State<LoginScreen> {
           {
             return
               (processing)?
-              Center(child: Column(children: [CircularProgressIndicator(backgroundColor: Colors.lightGreenAccent)], crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.center))
+              Center(
+                  child: Column(
+                      children: [
+                        CircularProgressIndicator(backgroundColor: Colors.lightGreenAccent)
+                      ],
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center
+                  )
+              )
                   :
               SingleChildScrollView(
                 child:
@@ -85,21 +93,54 @@ class _LoginScreenState extends State<LoginScreen> {
                             Container(
                               height: 40.0,
                               child: Center(
-                                child: FlatButton(
-                                  color: Colors.red,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20.0)),
-                                  padding: EdgeInsets.symmetric(horizontal: (MediaQuery.of(context).size.width)/3),
-                                  onPressed: ()=>_loginNotImplemented(context),
-                                  child: Text(
-                                    'Log in',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'Montserrat'
-                                    ),
-                                  ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: FlatButton(
+                                        color: Colors.red,
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(20.0)),
+                                        onPressed: ()=>_loginNotImplemented(context),
+                                        child: Text(
+                                          'Log in',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontFamily: 'Montserrat'
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  ],
                                 ),
+                              ),
+                            ),
+                            Container(
+                              height: 40.0,
+                              child: Center(
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: FlatButton(
+                                        color: Colors.green,
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(20.0)
+                                        ),
+                                        onPressed: () {
+                                          _showConfirmation();
+                                        },
+                                        child: Text(
+                                          'New user? Click to sign up',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontFamily: 'Montserrat'
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                )
                               ),
                             ),
                             SizedBox(height: 20.0),
@@ -119,6 +160,12 @@ class _LoginScreenState extends State<LoginScreen> {
         });
   }
 
+  void _showConfirmation(){
+    showModalBottomSheet(context: context, builder: (context){
+      return MyConfirmation();
+    },
+    );
+  }
 
   Future<void> _loginNotImplemented(context) async {
     try{
@@ -161,4 +208,81 @@ class _LoginScreenState extends State<LoginScreen> {
 
   }
 
+}
+
+class MyConfirmation extends StatefulWidget {
+  @override
+  _MyConfirmationState createState() => _MyConfirmationState();
+}
+
+class _MyConfirmationState extends State<MyConfirmation> {
+  String _password;
+  @override
+  void initState() {
+    super.initState();
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: Container(
+            height: 200,
+            padding: EdgeInsets.only(top: 0, left: 20.0, right: 20.0),
+            child: Column(
+              children: [
+                Container(
+                  padding: EdgeInsets.fromLTRB(15.0, 10, 0.0, 0.0),
+                  child: Text(
+                      'Please confirm your password below:',
+                      style: TextStyle(
+                          fontSize: 15.0)),
+                ),
+                Divider(),
+                TextField(
+                  decoration: InputDecoration(
+                      labelText: 'Password',
+                      labelStyle: TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red),
+                      focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.red)
+                      )
+                  ),
+                  obscureText: true,
+                  onChanged: (String str) {
+                    _password = str;
+                  },
+                ),
+                SizedBox(height: 15.0),
+                Container(
+                  height: 40.0,
+                  width: 100.0,
+                  child: Center(
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: FlatButton(
+                              color: Colors.teal,
+                              onPressed: () {
+                                //TODO: complete
+                              },
+                              child: Text(
+                                'Confirm',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'Montserrat'
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      )
+                  ),
+                ),
+              ],
+            )
+        )
+    );
+  }
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:english_words/english_words.dart';
 
-
 class SavedPage extends StatefulWidget {
   final Set<WordPair> saved;
   SavedPage(this.saved);
