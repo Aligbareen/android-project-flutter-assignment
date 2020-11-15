@@ -141,7 +141,7 @@ class _RandomWordsState extends State<RandomWords> with SingleTickerProviderStat
         ),
         grabbing: InkWell(
           child: Container(
-            color: Colors.grey,
+            color: Colors.blueGrey[200],
             padding: EdgeInsets.fromLTRB(10, 0, 10, 0 ),
             margin: EdgeInsets.fromLTRB(0,20, 0, 0 ),
             child: Padding(

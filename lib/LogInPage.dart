@@ -23,7 +23,8 @@ class _LoginScreenState extends State<LoginScreen> {
       key: _scaffoldKeyLog,
       //resizeToAvoidBottomPadding: false,
       appBar: AppBar(
-        title: Center(child: Text('Login')),
+        centerTitle: true,
+        title: Text('Login'),
       ),
       body: Builder(
           builder: (BuildContext context)
@@ -47,11 +48,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: <Widget>[
                     Container(
                       child: Container(
-                        padding: EdgeInsets.fromLTRB(15.0, 50.0, 0.0, 0.0),
+                        padding: EdgeInsets.fromLTRB(15.0, 35.0, 0.0, 0.0),
                         child: Text(
                             'Welcome to StartupNames Generator, please log in below',
                             style: TextStyle(
-                                fontSize: 20.0, fontWeight: FontWeight.bold)),
+                                fontSize: 16.0)),
                       ),
                     ),
                     Container(
@@ -63,10 +64,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                   labelText: 'Email',
                                   labelStyle: TextStyle(
                                       fontFamily: 'Montserrat',
-                                      fontWeight: FontWeight.bold,
                                       color: Colors.grey),
                                   focusedBorder: UnderlineInputBorder(
-                                      borderSide: BorderSide(color: Colors.green)
+                                      borderSide: BorderSide(color: Colors.red)
                                   )
                               ),
                               onChanged: (String str) {
@@ -79,10 +79,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                   labelText: 'Password',
                                   labelStyle: TextStyle(
                                       fontFamily: 'Montserrat',
-                                      fontWeight: FontWeight.bold,
                                       color: Colors.grey),
                                   focusedBorder: UnderlineInputBorder(
-                                      borderSide: BorderSide(color: Colors.green)
+                                      borderSide: BorderSide(color: Colors.red)
                                   )
                               ),
                               obscureText: true,
