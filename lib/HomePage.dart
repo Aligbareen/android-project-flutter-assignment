@@ -106,10 +106,11 @@ class _RandomWordsState extends State<RandomWords> with SingleTickerProviderStat
                     leading: Container(
                       //color: Colors.green,
                       child: CircleAvatar(
+
                         backgroundColor: Colors.blue,
                         foregroundColor: Colors.green,
-
                         radius: 35,
+                        child: Text(FirebaseAuth.instance.currentUser.email[0].toUpperCase(),style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0, color: Colors.white)),
                       ),
                     ),
                     title: Text(FirebaseAuth.instance.currentUser.email,style: TextStyle(color: Colors.black,fontSize: 20),),
@@ -175,10 +176,6 @@ class _RandomWordsState extends State<RandomWords> with SingleTickerProviderStat
               _arrowIconAnimationController.reverse();
             });
           }
-        },
-        onSnapBegin: (){
-        },
-        onSnapEnd: (){
         },
         snapPositions:  [
           SnapPosition(positionFactor: 0, snappingCurve: Curves.elasticOut, snappingDuration: Duration(milliseconds: 750)),

@@ -10,9 +10,10 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  String _password, _username;
+  String _password, _username, _otherPassword;
   bool processing = false;
   bool loggedIn = false;
+  final formKey = GlobalKey<FormState>();
   final GlobalKey<ScaffoldState> _scaffoldKeyLog = new GlobalKey<ScaffoldState>();
   _LoginScreenState();
 
@@ -162,7 +163,82 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _showConfirmation(){
     showModalBottomSheet(context: context, builder: (context){
-      return MyConfirmation();
+      return Form(
+        key: formKey,
+        child: Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Container(
+                height: 200,
+                padding: EdgeInsets.only(top: 0, left: 20.0, right: 20.0),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.fromLTRB(15.0, 10, 0.0, 0.0),
+                      child: Text(
+                          'Please confirm your password below:',
+                          style: TextStyle(
+                              fontSize: 15.0)),
+                    ),
+                    Divider(),
+                    TextFormField(
+                      decoration: InputDecoration(
+                          labelText: 'Password',
+                          labelStyle: TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontWeight: FontWeight.bold,
+                              color: Colors.red),
+                          focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.red)
+                          )
+                      ),
+                      validator: (val) => val != _password ? 'Passwords must match' : null,
+                      obscureText: true,
+                      onSaved: (val) {},
+                    ),
+                    SizedBox(height: 1),
+                    Container(
+                      height: 40.0,
+                      width: 100.0,
+                      child: Center(
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: FlatButton(
+                                  color: Colors.teal,
+                                  onPressed: () async {
+                                    final form = formKey.currentState;
+                                    if (form.validate()) {
+                                      form.save();
+                                      Navigator.pop(context, loggedIn);
+                                      setState(() {
+                                        processing = true;
+                                      });
+                                      await FirebaseAuth.instance.createUserWithEmailAndPassword(email: _username, password: _password);
+                                      await FirebaseAuth.instance.signInWithEmailAndPassword(email: _username, password: _password);
+                                      setState(() {
+                                        processing = false;
+                                      });
+                                      whenLoggedIn();
+                                    }
+                                  },
+                                  child: Text(
+                                    'Confirm',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: 'Montserrat'
+                                    ),
+                                  ),
+                                ),
+                              )
+                            ],
+                          )
+                      ),
+                    ),
+                  ],
+                )
+            )
+        ),
+      );
     },
     );
   }
@@ -210,79 +286,4 @@ class _LoginScreenState extends State<LoginScreen> {
 
 }
 
-class MyConfirmation extends StatefulWidget {
-  @override
-  _MyConfirmationState createState() => _MyConfirmationState();
-}
 
-class _MyConfirmationState extends State<MyConfirmation> {
-  String _password;
-  @override
-  void initState() {
-    super.initState();
-  }
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: Container(
-            height: 200,
-            padding: EdgeInsets.only(top: 0, left: 20.0, right: 20.0),
-            child: Column(
-              children: [
-                Container(
-                  padding: EdgeInsets.fromLTRB(15.0, 10, 0.0, 0.0),
-                  child: Text(
-                      'Please confirm your password below:',
-                      style: TextStyle(
-                          fontSize: 15.0)),
-                ),
-                Divider(),
-                TextField(
-                  decoration: InputDecoration(
-                      labelText: 'Password',
-                      labelStyle: TextStyle(
-                          fontFamily: 'Montserrat',
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red),
-                      focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.red)
-                      )
-                  ),
-                  obscureText: true,
-                  onChanged: (String str) {
-                    _password = str;
-                  },
-                ),
-                SizedBox(height: 15.0),
-                Container(
-                  height: 40.0,
-                  width: 100.0,
-                  child: Center(
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: FlatButton(
-                              color: Colors.teal,
-                              onPressed: () {
-                                //TODO: complete
-                              },
-                              child: Text(
-                                'Confirm',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'Montserrat'
-                                ),
-                              ),
-                            ),
-                          )
-                        ],
-                      )
-                  ),
-                ),
-              ],
-            )
-        )
-    );
-  }
-}
