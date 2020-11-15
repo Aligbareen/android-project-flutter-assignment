@@ -60,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           children: <Widget>[
                             TextField(
                               decoration: InputDecoration(
-                                  labelText: 'EMAIL',
+                                  labelText: 'Email',
                                   labelStyle: TextStyle(
                                       fontFamily: 'Montserrat',
                                       fontWeight: FontWeight.bold,
@@ -76,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             SizedBox(height: 20.0),
                             TextField(
                               decoration: InputDecoration(
-                                  labelText: 'PASSWORD',
+                                  labelText: 'Password',
                                   labelStyle: TextStyle(
                                       fontFamily: 'Montserrat',
                                       fontWeight: FontWeight.bold,

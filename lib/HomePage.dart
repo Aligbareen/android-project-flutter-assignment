@@ -1,3 +1,5 @@
+import 'dart:io' as io;
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:english_words/english_words.dart';
@@ -5,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hello_me/LogInPage.dart';
 import 'package:hello_me/SavedPage.dart';
 import 'package:snapping_sheet/snapping_sheet.dart';
+import 'package:image_picker/image_picker.dart';
 import 'dart:ui' as ui;
 
 class MyApp extends StatelessWidget {
@@ -27,6 +30,7 @@ class RandomWords extends StatefulWidget {
 
 class _RandomWordsState extends State<RandomWords> with SingleTickerProviderStateMixin{
   var _controller = SnappingSheetController();
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   final TextStyle _biggerFont = const TextStyle(fontSize: 18);
   double _blur = 0.0;
   bool _loggedIn = false;
@@ -35,6 +39,7 @@ class _RandomWordsState extends State<RandomWords> with SingleTickerProviderStat
   var _saved = Set<WordPair>();
   AnimationController _arrowIconAnimationController;
   Animation<double> _arrowIconAnimation;
+  String imageUrl;
 
   @override
   void initState() {
@@ -51,7 +56,8 @@ class _RandomWordsState extends State<RandomWords> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold (                     // Add from here...
+    return Scaffold (
+      key: _scaffoldKey,                    // Add from here...
       appBar: AppBar(
         title: Text('Startup Name Generator'),
         actions: [
@@ -106,11 +112,11 @@ class _RandomWordsState extends State<RandomWords> with SingleTickerProviderStat
                     leading: Container(
                       //color: Colors.green,
                       child: CircleAvatar(
-
                         backgroundColor: Colors.blue,
                         foregroundColor: Colors.green,
                         radius: 35,
-                        child: Text(FirebaseAuth.instance.currentUser.email[0].toUpperCase(),style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0, color: Colors.white)),
+                        child: Text((imageUrl==null)?FirebaseAuth.instance.currentUser.email[0].toUpperCase():"",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0, color: Colors.white)),
+                        backgroundImage: (imageUrl==null)? null : Image.network(imageUrl).image,
                       ),
                     ),
                     title: Text(FirebaseAuth.instance.currentUser.email,style: TextStyle(color: Colors.black,fontSize: 20),),
@@ -121,7 +127,9 @@ class _RandomWordsState extends State<RandomWords> with SingleTickerProviderStat
                       padding: EdgeInsets.fromLTRB(0,15,0,0),
                       //margin: EdgeInsets.fromLTRB(0, 0, 0, MediaQuery.of(context).size.height/9),
                       child: RaisedButton(
-                        onPressed: (){},
+                        onPressed: (){
+                          getImage();
+                        },
                         color: Colors.teal,
                         child: Text("Change avatar", style: TextStyle(color: Colors.white),),
 
@@ -188,6 +196,35 @@ class _RandomWordsState extends State<RandomWords> with SingleTickerProviderStat
     );
   }
 
+  Future getImage() async {
+    final _storage = FirebaseStorage.instance;
+
+    final image = await ImagePicker.pickImage(source: ImageSource.gallery);
+
+    if (image != null){
+
+      var file = io.File(image.path);
+      //Upload to Firebase
+
+      setState(() {
+        processing = true;
+      });
+      var snapshot = await _storage.ref()
+          .child('${FirebaseAuth.instance.currentUser.uid}/ProfileImage')
+          .putFile(file);
+
+      var downloadUrl = await snapshot.ref.getDownloadURL();
+
+      setState(() {
+        processing = false;
+        imageUrl = downloadUrl;
+      });
+    } else {
+      _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text("No image selected")));
+      return;
+    }
+  }
+
   void _pushSaved() async {
     await Navigator.of(context).push(
         MaterialPageRoute(
@@ -213,6 +250,7 @@ class _RandomWordsState extends State<RandomWords> with SingleTickerProviderStat
       _saved.clear();
       _loggedIn = false;
       processing = false;
+      imageUrl = null;
     });
   }
   void _pushLogin()  async {
@@ -223,9 +261,27 @@ class _RandomWordsState extends State<RandomWords> with SingleTickerProviderStat
         },
       ),
     );
-    setState(() {
+    if(_loggedIn){
+
+      final _storage = FirebaseStorage.instance;
+      var downloadUrl;
+      try{
+
+        setState(() {
+          processing = true;
+        });
+        downloadUrl = await _storage.ref()
+            .child('${FirebaseAuth.instance.currentUser.uid}/ProfileImage')
+            .getDownloadURL();
+      }catch(e){
+        downloadUrl = null;
+      }
+      setState(() {
+        processing = false;
+        imageUrl = downloadUrl;
+      });
     }
-    );
+    else {setState(() {});}
   }
 
 
