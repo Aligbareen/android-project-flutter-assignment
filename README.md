@@ -1,16 +1,9 @@
-# hello_me
-
-A new Flutter application.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Dry questions
+1.	The developer used SnappingSheetController to implement the controller.
+    this controller allow the user to control the following features:
+    a. get a list of the different possible SnapPositions that SnappingSheet currently has.
+    b. get current SnapPosition.
+    c. Snaps to a given SnapPosition.
+2. the parameter snappingCurve in a SnapPosition controls the animation curve to this SnapPosition
+3. InkWell advantage: implements reaction to touches with ink splash effects.
+   GestureDetector advantage: allow setting actions for a lot of "advanced events" such as onTapDown
